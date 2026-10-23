@@ -2,12 +2,16 @@ package com.scheduledevelop.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import org.hibernate.annotations.SoftDelete;
+import org.hibernate.type.YesNoConverter;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Entity
 @Table(name = "users")
+@SoftDelete(columnName = "is_deleted",
+        converter = YesNoConverter.class)
 public class User {
     //속성
     @Id
@@ -50,4 +54,9 @@ public class User {
     }
 
     //기능
+    public User update(String name, String email) {
+        this.name = name;
+        this.email = email;
+        return this;
+    }
 }

@@ -1,14 +1,14 @@
 package com.scheduledevelop.service;
 
-import com.scheduledevelop.dto.UserCreateRequestDto;
-import com.scheduledevelop.dto.UserCreateResponseDto;
-import com.scheduledevelop.dto.UserGetDetailResponseDto;
+import com.scheduledevelop.dto.*;
 import com.scheduledevelop.entity.User;
 import com.scheduledevelop.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -56,16 +56,16 @@ public class UserService {
     public UserGetDetailResponseDto getDetailUser(Long userId) {
 
         // 2-1. 조회 후 반환 된 데이터 받기
-        User foundUser = userRepository.findById(userId).orElseThrow(
+        User savedUser = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalStateException("not found user")
         );
 
         // 2-2. 반환 할 값 꺼내오기
-        Long id = foundUser.getId();
-        String name = foundUser.getName();
-        String email = foundUser.getEmail();
-        LocalDateTime createAt = foundUser.getCreateAt();
-        LocalDateTime updateAt = foundUser.getUpdateAt();
+        Long id = savedUser.getId();
+        String name = savedUser.getName();
+        String email = savedUser.getEmail();
+        LocalDateTime createAt = savedUser.getCreateAt();
+        LocalDateTime updateAt = savedUser.getUpdateAt();
 
         // 2-3. 반환 값 dto 담기
         UserGetDetailResponseDto responseDto = new UserGetDetailResponseDto(id,name,email,createAt,updateAt);
@@ -76,6 +76,80 @@ public class UserService {
 
 
 
+
+    }
+    // 3. 유저 전체 조회
+    @Transactional(readOnly = true)
+    public UserGetAllResponseDto getUsers() {
+
+        // 1. 조회
+        List<User> savedUserList = userRepository.findAll();
+
+        // 2. 검증
+        if (savedUserList.isEmpty()) {
+            throw new IllegalStateException("not found userList");
+        }
+        // 3. 데이터 준비
+        List<UserGetDetailResponseDto> filterUserList = new ArrayList<>();
+        for (User user : savedUserList) {
+            UserGetDetailResponseDto responseDto = new UserGetDetailResponseDto(
+                    user.getId(),
+                    user.getName(),
+                    user.getEmail(),
+                    user.getCreateAt(),
+                    user.getUpdateAt()
+            );
+            filterUserList.add(responseDto);
+
+        }
+        // 4. 반환
+        return new UserGetAllResponseDto(filterUserList);
+
+    }
+    // 4. 유저 수정
+    @Transactional
+    public UserUpdateResponseDto userUpdate(Long userId, UserUpdateRequestDto request) {
+
+        // 1. 조회
+        User savedUser = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalStateException("not found user")
+        );
+
+        // 2. 수정할 데이터 준비
+        String newName = request.getName();
+        String newEmail = request.getEmail();
+
+        // 3. 수정
+        User updateUser = savedUser.update(newName, newEmail);
+        userRepository.flush();
+
+        // 4. 수정 데이터 준비 및 dto 변환
+        UserUpdateResponseDto responseDto = new UserUpdateResponseDto(
+                updateUser.getId(),
+                updateUser.getName(),
+                updateUser.getEmail(),
+                updateUser.getCreateAt(),
+                updateUser.getUpdateAt()
+        );
+        // 5. 반환
+        return responseDto;
+
+
+    }
+    // 5. 유저 삭제
+    @Transactional
+    public UserDeleteResponseDto userDelete(Long userId) {
+
+        // 1. 조회
+        User savedUser = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalStateException("not found user")
+        );
+
+        // 2. 삭제 - soft delete
+        userRepository.delete(savedUser);
+
+        // 3. 반환
+        return new UserDeleteResponseDto("유저가 성공적으로 삭제되었습니다.");
 
     }
 }
