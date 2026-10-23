@@ -1,12 +1,18 @@
 package com.scheduledevelop.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SoftDelete;
+import org.hibernate.type.YesNoConverter;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "schedules")
+@SoftDelete(columnName = "is_deleted",
+        converter = YesNoConverter.class
+)
+
 public class Schedule {
     //속성
     @Id
@@ -80,6 +86,5 @@ public class Schedule {
         this.name = name;
         this.title = title;
         this.contents = contents;
-        this.updateAt = LocalDateTime.now();
     }
 }

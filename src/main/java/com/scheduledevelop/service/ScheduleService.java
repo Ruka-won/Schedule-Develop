@@ -45,6 +45,7 @@ public class ScheduleService {
         // 3. 일정 저장
         Schedule savedSchedule = scheduleRepository.save(schedule);
 
+
         // 4. 데이터 준비
         Long savedScheduleId = savedSchedule.getId();
         LocalDateTime savedScheduleCreateAt = savedSchedule.getCreateAt();
@@ -131,6 +132,8 @@ public class ScheduleService {
 
         // 3. 데이터 수정
         foundSchedule.updateSchedule(updateName, updateTitle, updateContents);
+        // 3-1. 수정일 업데이트
+        scheduleRepository.flush();
 
         // 4. 반환 데이터 준비
         Long id = foundSchedule.getId();
