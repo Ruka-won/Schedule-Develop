@@ -35,7 +35,8 @@ public class UserService {
          */
         String name = requestDto.getName();
         String email = requestDto.getEmail();
-        User user = new User(name, email);
+        String password = requestDto.getPassword();
+        User user = new User(name, email, password);
 
         // 1-2. 저장한 값을 반환 해주기 위해 받아오기
         User savedUser = userRepository.save(user);
@@ -144,7 +145,6 @@ public class UserService {
         User savedUser = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalStateException("not found user")
         );
-
         // 2. 삭제 - soft delete
         userRepository.delete(savedUser);
 

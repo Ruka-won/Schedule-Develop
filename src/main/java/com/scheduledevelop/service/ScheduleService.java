@@ -2,7 +2,9 @@ package com.scheduledevelop.service;
 
 import com.scheduledevelop.dto.*;
 import com.scheduledevelop.entity.Schedule;
+import com.scheduledevelop.entity.User;
 import com.scheduledevelop.repository.ScheduleRepository;
+import com.scheduledevelop.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,11 +18,13 @@ public class ScheduleService {
 
     //속성
     private final ScheduleRepository scheduleRepository;
+    private final UserRepository userRepository;
 
 
     //생성자
-    public ScheduleService(ScheduleRepository scheduleRepository) {
+    public ScheduleService(ScheduleRepository scheduleRepository, UserRepository userRepository) {
         this.scheduleRepository = scheduleRepository;
+        this.userRepository = userRepository;
     }
 
     //기능
@@ -30,17 +34,21 @@ public class ScheduleService {
         /*
          * 1. 데이터 준비 하고 검증
          */
-        String name =  scheduleCreateRequestDto.getName();
+        Long userID = scheduleCreateRequestDto.getUserId();
+
+        User user = userRepository.findById(userID).orElseThrow(
+                () -> new IllegalStateException("없는 유저 입니다.")
+        );
+
         String title = scheduleCreateRequestDto.getTitle();
         String contents = scheduleCreateRequestDto.getContents();
-        System.out.println("Verification name = " + name);
 
         /*
          * 2. 일정을 저장해야겠다.
          * 2-1. 저장을 하기 위해선 DB 1대1 매핑이 되는 엔티티를 생성해야겠다.
          * 2-2. 데이터 저장을 해야하니까 레퍼지토리랑 의존성을 연결시켜줘야겠다.
          */
-        Schedule schedule = new Schedule(name, title, contents);
+        Schedule schedule = new Schedule(user, title, contents);
 
         // 3. 일정 저장
         Schedule savedSchedule = scheduleRepository.save(schedule);
@@ -70,7 +78,7 @@ public class ScheduleService {
 
         // 2. 데이터 준비
         Long foundScheduleId = foundSchedule.getId();
-        String foundScheduleName = foundSchedule.getName();
+        String foundScheduleName = foundSchedule.getUser().getName();
         String foundScheduleTitle = foundSchedule.getTitle();
         String foundScheduleContents = foundSchedule.getContents();
         LocalDateTime createAt = foundSchedule.getCreateAt();
@@ -106,7 +114,7 @@ public class ScheduleService {
             for (Schedule schedule : listSchedule) {
                 ScheduleGetResponseDto responseDto = new ScheduleGetResponseDto(
                      schedule.getId(),
-                     schedule.getName(),
+                     schedule.getUser().getName(),
                      schedule.getTitle(),
                      schedule.getContents(),
                      schedule.getCreateAt(),
@@ -131,7 +139,8 @@ public class ScheduleService {
         String updateContents = requestDto.getContents();
 
         // 3. 데이터 수정
-        foundSchedule.updateSchedule(updateName, updateTitle, updateContents);
+        foundSchedule.updateSchedule(updateTitle, updateContents);
+
         // 3-1. 수정일 업데이트
         scheduleRepository.flush();
 

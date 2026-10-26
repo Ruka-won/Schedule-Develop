@@ -1,6 +1,7 @@
 package com.scheduledevelop.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.SoftDelete;
 import org.hibernate.type.YesNoConverter;
 import org.springframework.context.annotation.Configuration;
@@ -19,14 +20,19 @@ public class Schedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 100, nullable = false)
-    private String name;
+//    @Column(length = 100, nullable = false)
+//    private String name;
 
     @Column(length = 100, nullable = false)
     private String title;
 
     @Column(length = 200, nullable = false)
     private String contents;
+
+    @NotFound
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false)
     private LocalDateTime createAt;
@@ -40,8 +46,8 @@ public class Schedule {
 
     }
     // 내가 직접 사용하는 생성자
-    public Schedule(String name, String title, String contents) {
-        this.name = name;
+    public Schedule(User user, String title, String contents) {
+        this.user = user;
         this.title = title;
         this.contents = contents;
     }
@@ -62,9 +68,7 @@ public class Schedule {
         return this.id;
     }
 
-    public String getName() {
-        return this.name;
-    }
+    public User getUser() { return  this.user; }
 
     public String getTitle() {
         return this.title;
@@ -83,8 +87,7 @@ public class Schedule {
     }
 
     //데이터 수정
-    public void updateSchedule(String name, String title, String contents) {
-        this.name = name;
+    public void updateSchedule(String title, String contents) {
         this.title = title;
         this.contents = contents;
     }

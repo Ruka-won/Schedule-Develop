@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 @SoftDelete(columnName = "is_deleted",
         converter = YesNoConverter.class)
-public class User {
+public class User extends BaseEntity {
     //속성
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,6 +23,9 @@ public class User {
 
     @Column(length = 100,nullable = false)
     private String email;
+
+    @Column(length = 100,nullable = false)
+    private String password;
 
     @Column(nullable = false)
     private LocalDateTime createAt;
@@ -37,9 +40,10 @@ public class User {
 
     }
     // 내가 직접 사용하는 생성자
-    public User(String name, String email) {
+    public User(String name, String email,String password) {
         this.name = name;
         this.email = email;
+        this.password = password;
     }
 
     @PrePersist
