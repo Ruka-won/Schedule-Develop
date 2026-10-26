@@ -2,6 +2,7 @@ package com.scheduledevelop.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SoftDelete;
 import org.hibernate.type.YesNoConverter;
 import org.springframework.context.annotation.Configuration;
